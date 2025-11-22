@@ -150,8 +150,8 @@ namespace AVOS
         public static string userLogged = null;
         public static string userLevelLogged = "admin";
         public static string AvailableUserType = "Usual, Admin, Root, Tester, Dev";
-        public static string build = "50";
-        public static string revision = "4.20251019F6R";
+        public static string build = "51";
+        public static string revision = "4.20251122F7R";
         public static string edition = "Professional";
         public static string insidermode = null;
         public static string langSelected = "en_US";
@@ -1749,3 +1749,4 @@ namespace AVOS
 
 
 #endregion
+
