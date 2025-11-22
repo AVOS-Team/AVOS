@@ -28,7 +28,7 @@ namespace AVOS.System64.Security
                     if (input.Length > 0)
                     {
                         input = input.Remove(input.Length - 1);
-                        Console.Write("\b \b");
+                        Console.Write("");
                     }
                     continue;
                 }
@@ -41,3 +41,4 @@ namespace AVOS.System64.Security
         }
     }
 }
+
