@@ -1314,6 +1314,7 @@ namespace AVOS
                 case "sysinfo":
                     string CPU = Cosmos.Core.CPU.GetCPUBrandString();
                     string CPUvendor = Cosmos.Core.CPU.GetCPUVendorName();
+                    string CPUname = Cosmos.Core.CPU.GetCPUBrandString();
                     uint amount_of_ram = Cosmos.Core.CPU.GetAmountOfRAM();
                     ulong avialible_ram = Cosmos.Core.GCImplementation.GetAvailableRAM();
                     uint UsedRam = Cosmos.Core.GCImplementation.GetUsedRAM();
@@ -1323,7 +1324,7 @@ namespace AVOS
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.WriteLine("========================================================");
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.Write("CPU: {0}\nCPU Vendor: {1}\nAmount of RAM: {2} MB\nAvialible RAM: {3} MB\nUsed RAM: {4}\nArchitectureSystem: {5}\nComputer Name: {6}\nAudio: {7}", CPU, CPUvendor, amount_of_ram, avialible_ram, UsedRam, archsys, computername, sysaudio);
+                    Console.Write("CPU: {0}\nCPU Vendor: {1}\nCPU Name: {2}\nAmount of RAM: {3} MB\nAvailable RAM: {4} MB\nUsed RAM: {5}\nArchitectureSystem: {6}\nComputer Name: {7}\nAudio: {8}", CPU, CPUvendor, CPUname, amount_of_ram, avialible_ram, UsedRam, archsys, computername, sysaudio);
                     Processor.Bites();
                     VM.VMS();
                     break;
@@ -1745,5 +1746,6 @@ namespace AVOS
 
     }
 #endregion
+
 
 #endregion
