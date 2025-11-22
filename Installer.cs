@@ -304,7 +304,9 @@ namespace AVOS
             Console.WriteLine("Create your Password: ");
             TextColors.TextColorDarkYellow();
 
-            Kernel.password1 = Console.ReadLine();
+            string pass1 = SecureInput.ReadHidden();
+
+            Kernel.password1 = pass1
 
             File.WriteAllText(@"0:\AVOS\UserInfo\Password.txt", Kernel.password1);
         }
@@ -544,4 +546,5 @@ namespace AVOS
 
 
 }
+
 
