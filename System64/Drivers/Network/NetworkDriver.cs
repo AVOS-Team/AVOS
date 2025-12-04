@@ -1,4 +1,4 @@
-﻿using Cosmos.HAL.BlockDevice.Registers;
+using Cosmos.HAL.BlockDevice.Registers;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -42,38 +42,55 @@ namespace AVOS.System64.Drivers.Network
     {
         public static string networkdevicename = "eth0";
         public static string serverversion = "1.0.0";
+        private NetworkConfig config;
 
         public static void Network()
         {
             //NetworkDevice nic = NetworkDevice.GetDeviceByName("eth0"); //get network device by name
             //IPConfig.Enable(nic, new Address(248, 168, 3, 12), new Address(255, 255, 255, 0), new Address(192, 168, 1, 254));
 
-
-            string ipaddress = NetworkConfiguration.CurrentAddress.ToString();
-            string networkname = networkdevicename.ToString();
-            string macaddres = MACAddress.Broadcast.ToString();
-            string ver = serverversion.ToString();
-            
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("========================================================");
-            TextColors.TextColorWhite();
-            Console.WriteLine("IP Address: {0}\nNetwork Name: {1}\nMAC Address: {2}\nServer Version: {3}", ipaddress, networkname, macaddres, ver);
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("========================================================");
-        }
-
-        public static void test()
-        {
-            using (var AVNetworkClient = new DnsClient())
+            foreach (NetworkConfig config in NetworkConfiguration.NetworkConfigs)
             {
-                AVNetworkClient.Connect(new Address(192, 168, 1, 254)); //DNS Server address /**new Address(192, 168, 1, 254**/
-
-                /** Send DNS ask for a single domain name **/
-                AVNetworkClient.SendAsk("https://github.com");
-
-                /** Receive DNS Response **/
-                Address destination = AVNetworkClient.Receive(1); //can set a timeout value
+                switch (config.Device.CardType)
+                {
+                    case CardType.Ethernet:
+                        Console.Write("Ethernet Card : " + config.Device.NameID + " - " + config.Device.Name);
+                        break;
+                    case CardType.Wireless:
+                        Console.Write("Wireless Card : " + config.Device.NameID + " - " + config.Device.Name);
+                        break;
+                }
+                if (NetworkConfiguration.CurrentNetworkConfig.Device == config.Device)
+                {
+                    Console.WriteLine(" (current)");
+                }
+                else
+                {
+                    Console.WriteLine();
+                }
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("========================================================");
+                TextColors.TextColorYellow();
+                Console.WriteLine("MAC Address          : " + config.Device.MACAddress.ToString());
+                Console.WriteLine("IP Address           : " + config.IPConfig.IPAddress.ToString());
+                Console.WriteLine("Subnet mask          : " + config.IPConfig.SubnetMask.ToString());
+                Console.WriteLine("Default Gateway      : " + config.IPConfig.DefaultGateway.ToString());
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("========================================================");
             }
         }
+
+        public static void DHCP()
+        {
+            using (var xClient = new DHCPClient())
+            {
+                /** Send a DHCP Discover packet **/
+                //This will automatically set the IP config after DHCP response
+                xClient.SendDiscoverPacket();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("DHCP successfully");
+            }
+        }
+
     }
 }
