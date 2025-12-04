@@ -1,4 +1,4 @@
-﻿using AVOS.Fonts;
+using AVOS.Fonts;
 using AVOS.Fonts.TFF;
 using AVOS.System64.AppsGUI;
 using AVOS.System64.Graphics;
@@ -25,6 +25,10 @@ namespace AVOS.System64.Graphics
         public static int ScreenSizeX = 1920, ScreenSizeY = 1080;
         public static SVGAIICanvas MainCanvas;
         public static Bitmap Wallpaper, Cursor;
+        public static string FontSelected = null;
+        public static string WallpaperSelect = null;
+        public static string CursorSelect = null;
+        public static string MouseSensitivity = null;
         public static Colors colors = new Colors();
         public static Debugger mDebugger = new Debugger("AVOS | GUI");
 
@@ -32,9 +36,6 @@ namespace AVOS.System64.Graphics
         public static int MX, MY;
         public static bool Clicked;
         public static bool StartMenuVisible = false;
-        public static string WallpaperSelect = null;
-        public static string CursorSelect = null;
-        public static string MouseSensitivity = null;
         public static Process currentProcess;
 
         private static FPSCounter fpsCounter = new FPSCounter();
@@ -110,7 +111,6 @@ namespace AVOS.System64.Graphics
                     xOffset += 130;
                 }
 
-
                 // === Время и дата ===
                 string time = ShowSeconds ? DateTime.Now.ToString("HH:mm:ss") : DateTime.Now.ToString("HH:mm");
                 int rightX = ScreenSizeX - 110;
@@ -143,10 +143,10 @@ namespace AVOS.System64.Graphics
                     rebootButton = new Rectangle(menuX + 10, menuY + 110, 200, 25);
                     exitButton = new Rectangle(menuX + 10, menuY + 140, 200, 25);
 
-                    MainCanvas.DrawString("Settings", Font16, Color.White, settingsBtn.X, settingsBtn.Y);
-                    MainCanvas.DrawString("Explorer", Font16, Color.White, explorerBtn.X, explorerBtn.Y);
-                    MainCanvas.DrawString("Reboot", Font16, Color.White, rebootButton.X, rebootButton.Y);
-                    MainCanvas.DrawString("Shutdown", Font16, Color.White, exitButton.X, exitButton.Y);
+                    MainCanvas.DrawString("→ Settings", Font16, Color.White, settingsBtn.X, settingsBtn.Y);
+                    MainCanvas.DrawString("→ Explorer", Font16, Color.White, explorerBtn.X, explorerBtn.Y);
+                    MainCanvas.DrawString("→ Reboot", Font16, Color.White, rebootButton.X, rebootButton.Y);
+                    MainCanvas.DrawString("→ Exit", Font16, Color.White, exitButton.X, exitButton.Y);
                 }
 
                 // === Обработка кликов ===
@@ -162,14 +162,29 @@ namespace AVOS.System64.Graphics
                         mDebugger.Send("Start button clicked. Menu visible = " + StartMenuVisible);
                     }
 
-                    // Кнопки окон
+                    // Кнопки окон (поведение как в Windows)
                     for (int i = 0; i < taskRects.Count; i++)
                     {
                         var rect = taskRects[i];
+                        var proc = taskProcs[i];
+
                         if (IsInside(MX, MY, rect))
                         {
-                            currentProcess = taskProcs[i];
-                            mDebugger.Send("Activated window: " + currentProcess.Name);
+                            if (proc.WindowData.State == WindowData.WindowState.Minimized)
+                            {
+                                // если свернуто → разворачиваем
+                                proc.WindowData.State = WindowData.WindowState.Normal;
+                                mDebugger.Send($"Restored window: {proc.Name}");
+                            }
+                            else if (proc.WindowData.State == WindowData.WindowState.Normal ||
+                                     proc.WindowData.State == WindowData.WindowState.Maximized)
+                            {
+                                // если открыто → свернуть
+                                proc.WindowData.State = WindowData.WindowState.Minimized;
+                                mDebugger.Send($"Minimized window: {proc.Name}");
+                            }
+
+                            currentProcess = proc;
                         }
                     }
 
@@ -183,7 +198,7 @@ namespace AVOS.System64.Graphics
                             ProcessManager.Start(new SettingsWindow
                             {
                                 WindowData = new WindowData { WinPos = new Rectangle(200, 200, 400, 220) },
-                                Name = "Настройки системы"
+                                Name = "Settings"
                             });
                         }
 
@@ -194,8 +209,8 @@ namespace AVOS.System64.Graphics
                             ProcessManager.Start(new MessageBox
                             {
                                 WindowData = new WindowData { WinPos = new Rectangle(300, 250, 400, 200) },
-                                Name = "Проводник",
-                                Message = "Проводник в разработке"
+                                Name = "Explorer",
+                                Message = "SOON"
                             });
                         }
 
@@ -298,7 +313,7 @@ namespace AVOS.System64.Graphics
                 {
                     WindowData = new WindowData { WinPos = new Rectangle(100, 100, 350, 200) },
                     Name = "FPS: " + fpsCounter.FPS,
-                    Message = "Добро пожаловать в AVOS!"
+                    Message = "Welocme to AVOS!"
                 });
 
                 mDebugger.Send("GUI initialized successfully.");
