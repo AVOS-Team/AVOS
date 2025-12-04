@@ -1,4 +1,4 @@
-﻿using AVOS.System64.Graphics;
+using AVOS.System64.Graphics;
 using AVOS.System64.Processing;
 using System;
 using System.Drawing;
@@ -27,7 +27,7 @@ namespace AVOS.System64.AppsGUI
 
             // фон
             GUI.MainCanvas.DrawFilledRectangle(GUI.colors.ColorMain, x, y + Window.TopSize, w, h - Window.TopSize);
-            GUI.MainCanvas.DrawString("Taskbar:", GUI.Font18, Color.White, x + 20, y + 60);
+            GUI.MainCanvas.DrawString("Taskbar:", GUI.Font16, Color.White, x + 20, y + 60);
 
             // чекбоксы
             int cbX = x + 30;
@@ -38,14 +38,14 @@ namespace AVOS.System64.AppsGUI
             // чекбокс 1 — секунды
             GUI.MainCanvas.DrawRectangle(Color.White, cbX, cbY1, cbSize, cbSize);
             if (GUI.ShowSeconds)
-                GUI.MainCanvas.DrawString("Y", GUI.Font18, Color.White, cbX + 2, cbY1 - 3);
-            GUI.MainCanvas.DrawString("Show seconds", GUI.Font18, Color.White, cbX + 30, cbY1);
+                GUI.MainCanvas.DrawString("Y", GUI.Font16, Color.White, cbX + 2, cbY1 - 3);
+            GUI.MainCanvas.DrawString("Show seconds", GUI.Font16, Color.White, cbX + 30, cbY1);
 
             // чекбокс 2 — дата
             GUI.MainCanvas.DrawRectangle(Color.White, cbX, cbY2, cbSize, cbSize);
             if (GUI.ShowDate)
-                GUI.MainCanvas.DrawString("Y", GUI.Font18, Color.White, cbX + 2, cbY2 - 3);
-            GUI.MainCanvas.DrawString("Show date", GUI.Font18, Color.White, cbX + 30, cbY2);
+                GUI.MainCanvas.DrawString("Y", GUI.Font16, Color.White, cbX + 2, cbY2 - 3);
+            GUI.MainCanvas.DrawString("Show date", GUI.Font16, Color.White, cbX + 30, cbY2);
 
             // обработка кликов
             bool mousePressed = (MouseManager.MouseState == MouseState.Left);
