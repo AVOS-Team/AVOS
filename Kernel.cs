@@ -1,4 +1,4 @@
-﻿
+
 // Библиотеки Cosmos \\
 
 #region Библиотеки Cosmos
@@ -100,6 +100,8 @@ using AVOS.System64.ProgrammingLanguages.JSONParser;
 using AVOS.System64.LoaderFiles;
 using AVOS.System64.Security;
 using AVOS.System64.Drivers.Brightness;
+using AVOS.API.ConsoleEngine;
+using AVOS.System64.Drivers.Network.FTP;
 
 //using AVOS.System64.Display;//AOD
 #endregion
@@ -150,8 +152,8 @@ namespace AVOS
         public static string userLogged = null;
         public static string userLevelLogged = "admin";
         public static string AvailableUserType = "Usual, Admin, Root, Tester, Dev";
-        public static string build = "51";
-        public static string revision = "4.20251122F7R";
+        public static string build = "50";
+        public static string revision = "4.20251019F6R";
         public static string edition = "Professional";
         public static string insidermode = null;
         public static string langSelected = "en_US";
@@ -312,6 +314,7 @@ namespace AVOS
             CLS();
             System.Threading.Thread.Sleep(1000);
             Running = true;
+            NetworkDriver.DHCP();
             TextColors.TextColorMagenta();
             Console.WriteLine("Loading the system and values!");
             System.Threading.Thread.Sleep(1300);
@@ -325,25 +328,48 @@ namespace AVOS
         // Запуск \\
 
         #region Запуск
-
         protected override void Run()
         {
-            Date();
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.Write(username);
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("@");
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write(HostName);
-            TextColors.TextColorDarkRed();
-            Console.Write(";");
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.Write(userLogged);
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.Write("$ ");
-            Console.ForegroundColor = ConsoleColor.White;
+            if (guimode == false)
+            {
+                Date();
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.Write("AVOS");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("@");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write(username);
+                TextColors.TextColorDarkRed();
+                Console.Write(";");
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.Write(userLogged);
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write("$");
+                Console.ForegroundColor = ConsoleColor.White;
 
-            CMD();
+                SyncLeds();
+                CMD();
+            }
+            else
+            {
+                GUI.Update();
+            }
+            if (lastHeapCollect >= 20)
+            {
+                Heap.Collect();
+                lastHeapCollect = 0;
+            }
+            else
+                lastHeapCollect++;
+        }
+
+        private void SyncLeds()
+        {
+            KeyboardLeds.Sync(
+                Sys.Global.CapsLock,
+                Sys.Global.NumLock,
+                Sys.Global.ScrollLock
+            );
         }
         #endregion
 
@@ -478,8 +504,10 @@ namespace AVOS
             var available_space = fs.GetAvailableFreeSpace(@"0:\");
             var totalsize = fs.GetTotalSize(@"0:\");
             var count = fs.Disks.Count;
+
             if (string.IsNullOrWhiteSpace(input))
                 return;
+
             string[] parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             string cmd = parts[0].ToLower();
 
@@ -512,9 +540,15 @@ namespace AVOS
                     BrightnessDriver.FadeIn(3); // 3 = скорость
                     Console.WriteLine("Screen darkened");
                     break;
-                case "test6":
+                case "network -dhcp":
+                    NetworkDriver.DHCP();
                     break;
-
+                case "network -ftp":
+                    FTP.Start();
+                    break;
+                case "network -help":
+                    NetworkTools.Help();
+                    break;
                 case "network":
                     NetworkDriver.Network();
                     break;
@@ -992,7 +1026,7 @@ namespace AVOS
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.WriteLine("========================================================");
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("devtoolsenable - Dev Tools Enable\n;devtools - For Developers\nappslauncher - Apps Launcher\navregistryeditoredit - AVRegistryEditorEdit\nsystemcom - System Components\ninfoapps - Info Apps\ncpulogo - Cpu Logo\nlock - Lock User\ngeneratoruuid - Generator UUID\nextensionssettings - Settings Extensions\ntrust - Trust Guard\napiinfo - Api Info\ndeletepassword - Delete Password\ncreatepassword - Create Password\ndiagnostics - Diagnostics\ngui - Start GUI Mode\nkeybinds - KeyBinds (NumLock, CapsLock and ScrollLock)");
+                    Console.WriteLine("devtoolsenable - Dev Tools Enable\n;devtools - For Developers\nappslauncher - Apps Launcher\navregistryeditoredit - AVRegistryEditorEdit\nsystemcom - System Components\ninfoapps - Info Apps\ncpulogo - Cpu Logo\nlock - Lock User\ngeneratoruuid - Generator UUID\nextensionssettings - Settings Extensions\ntrust - Trust Guard\napiinfo - Api Info\ndeletepassword - Delete Password\ncreatepassword - Create Password\ndiagnostics - Diagnostics\ngui - Start GUI Mode\nkeybinds - KeyBinds (NumLock, CapsLock and ScrollLock)\nnetwork -dhcp - DHCP\nnetwork -ftp - Start FTP server\network -help - Help");
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.WriteLine("========================================================");
                     break;
@@ -1293,7 +1327,8 @@ namespace AVOS
 
                     else
                     {
-                        Console.WriteLine("");
+                        TextColors.TextColorRed();
+                        Console.WriteLine("Unfortunately, we can't identify the logo for your processor.");
                     }
 
                     break;
@@ -1487,7 +1522,6 @@ namespace AVOS
 
             public static void VMS()
             {
-
                 if (Sys.VMTools.IsVMWare)
                 {
                     // Если вы тестируйте систему, то виртуализация будет "VMware" \\
@@ -1736,7 +1770,9 @@ namespace AVOS
                 TextColors.TextColorGreen();
                 Console.WriteLine("                          Network Help");
                 Console.WriteLine("1) network -dhcp | Detects IP addresses via DHCP");
-                Console.WriteLine("2) network -ping | Checking the Internet");
+                //Console.WriteLine("2) network -ping | Checking the Internet");
+                Console.WriteLine("2) network -ftp | Start FTP server");
+                Console.WriteLine("3) network -help | Help");
             }
         }
 
@@ -1747,6 +1783,4 @@ namespace AVOS
     }
 #endregion
 
-
 #endregion
-
